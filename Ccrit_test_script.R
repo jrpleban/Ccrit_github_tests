@@ -1,7 +1,7 @@
 
 ## Testing Bayesian Estimatation of Ccrit from hypothetical data of Ci and Fv'Fm ###
 # R 3.2.1
-# Updated: 02__2017. Jonathan R Plean.
+# Updated: 02_06_2017. Jonathan R Plean.
 # Reviewed by: No one
 
 ### Script depends on two models for finding Ccrit 
@@ -9,10 +9,10 @@
               ###          Gu et al (2010) PCE Figs. 8,9,10
 
 # model estimates Ccrit (transition point btw light and carbon limited photosynthesis)
-# alpha (y intercept on Fv'Fm as Ci approaches 0)
+# alpha (intercept of Fv'Fm)
 # 2 beta values  (beta[1] slope prior to Ccrit, beta[2] slope after Crit)
 
-# Sources: collaborator 
+# Sources:
 #
 
 
@@ -26,23 +26,23 @@ source("Ccrit_model.R")
 
 #### Set up for rjags #########
 parameters = c("alpha", "beta","Ccrit","tau")### pars to be monitored
-adaptSteps = 1000             # Number of steps to "tune" the samplers.
-burnInSteps = 5000            # Number of steps to "burn-in" the samplers.
+adaptSteps = 500             # Number of steps to "tune" the samplers.
+burnInSteps = 3000            # Number of steps to "burn-in" the samplers.
 nChains = 4                   # Number of chains to run.
 DICsteps= 20000                # Number of steps of sample DIC
-numSavedSteps= 5000       # Total number of steps in chains to save.
+numSavedSteps= 2500       # Total number of steps in chains to save.
 thinSteps=20                   # Number of steps to "thin" (1=keep every step).
 nPerChain = ceiling( ( numSavedSteps * thinSteps ) / nChains ) # Steps per chain.
 ###################################
 ####  Hypothetical DATA   #####
 ## 12 individuals 4 genotpyes
-## six intercepts
+## 12 intercepts
 Al<-rep(seq(0.42,0.52,by=0.02), 2)
-## six inital slopes
+## 12 inital slopes
 b1<-rep(seq(8e-3,9e-3, length.out=6),2)
 ##slope after Ccrit
 b2<-0
-# 6 Ccrit's
+# 12 Ccrit's
 Ccrit<-c(20,22,24,30,32,34, 40,42,44, 50,52,54)
 Cdat<-c(seq(0,40,5),seq(50,150,25))
 
@@ -51,12 +51,15 @@ dat <- matrix(NA, ncol =12, nrow = 14)
 for(i in 1:12){
   dat[,i]<-ifelse(Cdat<Ccrit[i], Cdat*b1[i]+Al[i], Cdat*b2+Ccrit[i]*b1[i]+Al[i])
 }
+dat
+
 ### plotting a subset of hyothetical data
 plot(Cdat,dat[,1], ylim=c(0.4,0.9))
 Col<-seq(1,6,1)
 for(i in 1:5){
 points(Cdat,dat[,i+1],col=Col[i+1])
 }
+## change points
 for(i in 1:6){
 abline(v=Ccrit[i], col=Col[i])
 }
@@ -76,6 +79,7 @@ for(j in 1:12){
   datalist[[j]]<-list(N=length(Cdat),
                       CiP=Cdat,  Fv..Fm.=dat[,j])
 }
+datalist
 ### create models & burn in
 models<-vector("list", 12)
 for(j in 1:12){
@@ -104,11 +108,12 @@ for(j in 1:12){
   colnames(meds)<-c("Ccrit","alpha","beta1","beta2","tau","sigma")  
 }
 meds<-as.data.frame(meds)
+meds
 ### quick comparison median posterior est against hypothetical values
 plot(meds$Ccrit,Ccrit)
 abline(0,1)
 
-### convergence diagnostics
+### convergence diagnostics   ## should be close to 1
 GD<-matrix(, nrow = 6, ncol=5)
 for(j in 1:6){
   GD[j,]<- gelman.diag(mcmcsamples[[j]])$psrf[1]
@@ -124,12 +129,16 @@ for(j in 1:6){
 GD<-cbind(GD,GDm)
 GD
 
+##########################################
 
+##########################################
 
-
+##########################################
 
 ###   hierarchical model set & sampling
-setwd("~/Desktop")
+
+##########################################
+
 source("Ccrit_model_hier.R")
 datalisthier<-list(N=168, Ngeno=4,  CiP=rep(Cdat,12) ,
                    geno=c(rep(c(1:4), each=42)),
