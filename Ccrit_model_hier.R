@@ -19,7 +19,7 @@ Ccrit[g] ~ dnorm(mu.Ccrit,tau.Ccrit)T(0,)
 
 mu.alpha ~ dnorm(1, 0.1)T(0,)
 mu.beta~ dnorm(0,0.01) #Uninformative
-mu.Ccrit ~ dnorm(30, 0.01)T(0,)
+mu.Ccrit ~ dnorm(40, 0.01)T(0,)
 tau.alpha ~ dnorm(.2, 1)
 tau.beta~ dnorm(1.0,1) #Uninformative
 tau.Ccrit ~ dnorm(4,.25)
