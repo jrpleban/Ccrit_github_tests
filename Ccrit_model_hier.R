@@ -17,7 +17,7 @@ alpha[g] ~ dnorm(mu.alpha, tau.alpha)T(0,)
 Ccrit[g] ~ dnorm(mu.Ccrit,tau.Ccrit)T(0,)
 }
 
-mu.alpha ~ dnorm(1, 0.1)T(0,)
+mu.alpha ~ dnorm(2, 0.1)T(0,)
 mu.beta~ dnorm(0,0.01) #Uninformative
 mu.Ccrit ~ dnorm(40, 0.01)T(0,)
 tau.alpha ~ dnorm(.2, 1)
